@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/LastBit97/todolist/config"
+	"github.com/getsentry/sentry-go"
 
 	"github.com/LastBit97/todolist/middleware"
 	"github.com/LastBit97/todolist/router"
@@ -17,6 +18,17 @@ import (
 const defaultPort = "8080"
 
 func main() {
+
+	err := sentry.Init(sentry.ClientOptions{
+		Dsn:   "http://8246520e051040cf804cbad4416c5955@sentry.infotecs.int/17",
+		Debug: true,
+	})
+	if err != nil {
+		log.Fatalf("sentry.Init: %s", err)
+	}
+	defer sentry.Flush(2 * time.Second)
+
+	sentry.CaptureMessage("It works!")
 
 	port := os.Getenv("PORT")
 	if port == "" {
