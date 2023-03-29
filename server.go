@@ -20,8 +20,10 @@ const defaultPort = "8080"
 func main() {
 
 	err := sentry.Init(sentry.ClientOptions{
-		Dsn:   "http://8246520e051040cf804cbad4416c5955@sentry.infotecs.int/17",
-		Debug: true,
+		Dsn:              "http://8246520e051040cf804cbad4416c5955@sentry.infotecs.int/17",
+		Debug:            true,
+		EnableTracing:    true,
+		TracesSampleRate: 1.0,
 	})
 	if err != nil {
 		log.Fatalf("sentry.Init: %s", err)
