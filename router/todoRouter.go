@@ -1,18 +1,15 @@
 package router
 
 import (
-	"net/http"
-
 	"github.com/LastBit97/todolist/controller"
-
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
-func registerTodoRouter(r *mux.Router) {
+func registerTodoRouter(rg *gin.RouterGroup) {
 
-	todoRouter := r.PathPrefix("/todo").Subrouter()
-	todoRouter.HandleFunc("/{id}", controller.TodoGetByIDController).Methods(http.MethodGet)
-	todoRouter.HandleFunc("/", controller.TodoCreateController).Methods(http.MethodPost)
-	todoRouter.HandleFunc("/{id}", controller.TodoUpdateController).Methods(http.MethodPut)
-	todoRouter.HandleFunc("/{id}", controller.TodoDeleteController).Methods(http.MethodDelete)
+	router := rg.Group("/todo")
+	router.GET("/{id}", controller.TodoGetByIDController)
+	router.POST("/", controller.TodoCreateController)
+	router.PUT("/{id}", controller.TodoUpdateController)
+	router.DELETE("/{id}", controller.TodoDeleteController)
 }

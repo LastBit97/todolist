@@ -2,25 +2,22 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 	"time"
 
 	"github.com/LastBit97/todolist/config"
 	"github.com/getsentry/sentry-go"
+	"github.com/gin-gonic/gin"
 
-	"github.com/LastBit97/todolist/middleware"
 	"github.com/LastBit97/todolist/router"
-
-	"github.com/gorilla/mux"
 )
 
-const defaultPort = "8080"
+const defaultPort = "8000"
 
 func main() {
 
 	err := sentry.Init(sentry.ClientOptions{
-		Dsn:              "http://8246520e051040cf804cbad4416c5955@sentry.infotecs.int/17",
+		Dsn:              "https://9ace5290285b413bbbd534c8ca39e1fc@o4504917501804544.ingest.sentry.io/4504917504819200",
 		Debug:            true,
 		EnableTracing:    true,
 		TracesSampleRate: 1.0,
@@ -48,23 +45,12 @@ func main() {
 		log.Println("Fail to initialize client")
 	}
 
-	//set the client to the variable defined in package config
-	//this will enable the client intance to be accessed anywhere through the accessor which is a function
-	//named GetClient
 	config.SetClient(client)
 
-	//initiate router and register all the route
-	r := mux.NewRouter()
-	r.Use(middleware.Header)
-	router.RegisterRouter(r)
-
-	srv := &http.Server{
-		Handler:      r,
-		Addr:         "localhost:" + port,
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
-	}
-
 	log.Println("Server started on port " + port)
-	log.Fatal(srv.ListenAndServe())
+
+	server := gin.Default()
+	rg := server.Group("/api")
+	router.RegisterRouter(rg)
+	log.Fatal(server.Run(":" + port))
 }

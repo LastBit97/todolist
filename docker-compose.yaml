@@ -17,4 +17,4 @@ volumes:
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: '/home/lastbit/data-mysql'
+      device: 'home/lastbit/data-mysql'

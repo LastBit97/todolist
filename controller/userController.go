@@ -1,105 +1,103 @@
 package controller
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 
 	"github.com/LastBit97/todolist/ent"
-	"github.com/LastBit97/todolist/utils"
+	"github.com/gin-gonic/gin"
 
 	"github.com/LastBit97/todolist/service"
-
-	"github.com/gorilla/mux"
 )
 
-func UserGetAllController(w http.ResponseWriter, r *http.Request) {
+func UserGetAllController(ctx *gin.Context) {
 
-	users, err := service.NewUserOps(r.Context()).UsersGetAll()
+	users, err := service.NewUserOps(ctx).UsersGetAll()
+
 	if err != nil {
-		utils.Return(w, false, http.StatusInternalServerError, err, nil)
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	utils.Return(w, true, http.StatusOK, nil, users)
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": users})
 }
 
-func UserGetByIDController(w http.ResponseWriter, r *http.Request) {
+func UserGetByIDController(ctx *gin.Context) {
 
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		utils.Return(w, false, http.StatusBadRequest, err, nil)
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+	user, err := service.NewUserOps(ctx).UserGetByID(id)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	user, err := service.NewUserOps(r.Context()).UserGetByID(id)
-	if err != nil {
-		utils.Return(w, false, http.StatusInternalServerError, err, nil)
-		return
-	}
-
-	utils.Return(w, true, http.StatusOK, nil, user)
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": user})
 }
 
-func UserCreateController(w http.ResponseWriter, r *http.Request) {
+func UserCreateController(ctx *gin.Context) {
 
 	var newUser ent.User
-	err := json.NewDecoder(r.Body).Decode(&newUser)
-	if err != nil {
-		utils.Return(w, false, http.StatusBadRequest, err, nil)
+
+	if err := ctx.ShouldBindJSON(&newUser); err != nil {
+		ctx.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	user, err := service.NewUserOps(r.Context()).UserCreate(newUser)
+	user, err := service.NewUserOps(ctx).UserCreate(newUser)
+
 	if err != nil {
-		utils.Return(w, false, http.StatusInternalServerError, err, nil)
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	utils.Return(w, true, http.StatusOK, nil, user)
+	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": user})
 }
 
-func UserUpdateController(w http.ResponseWriter, r *http.Request) {
+func UserUpdateController(ctx *gin.Context) {
 
 	var newUserData ent.User
-	err := json.NewDecoder(r.Body).Decode(&newUserData)
-	if err != nil {
-		utils.Return(w, false, http.StatusBadRequest, err, nil)
+	if err := ctx.ShouldBindJSON(&newUserData); err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		utils.Return(w, false, http.StatusBadRequest, err, nil)
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 	newUserData.ID = id
 
-	updatedUser, err := service.NewUserOps(r.Context()).UserUpdate(newUserData)
+	updatedUser, err := service.NewUserOps(ctx).UserUpdate(newUserData)
 	if err != nil {
-		utils.Return(w, false, http.StatusInternalServerError, err, nil)
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	utils.Return(w, true, http.StatusOK, nil, updatedUser)
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": updatedUser})
 }
 
-func UserDeleteController(w http.ResponseWriter, r *http.Request) {
+func UserDeleteController(ctx *gin.Context) {
 
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		utils.Return(w, false, http.StatusBadRequest, err, nil)
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	deletedID, err := service.NewUserOps(r.Context()).UserDelete(id)
+	deletedID, err := service.NewUserOps(ctx).UserDelete(id)
 	if err != nil {
-		utils.Return(w, false, http.StatusInternalServerError, err, nil)
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	utils.Return(w, true, http.StatusOK, nil, deletedID)
+	ctx.JSON(http.StatusNoContent, deletedID)
 }

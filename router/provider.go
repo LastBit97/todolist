@@ -1,8 +1,10 @@
 package router
 
-import "github.com/gorilla/mux"
+import (
+	"github.com/gin-gonic/gin"
+)
 
-func RegisterRouter(r *mux.Router) {
-	registerTodoRouter(r)
-	registerUserRouter(r)
+func RegisterRouter(rg *gin.RouterGroup) {
+	registerTodoRouter(rg)
+	registerUserRouter(rg)
 }

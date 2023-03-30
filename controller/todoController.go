@@ -1,94 +1,92 @@
 package controller
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 
 	"github.com/LastBit97/todolist/ent"
-	"github.com/LastBit97/todolist/utils"
+	"github.com/gin-gonic/gin"
 
 	"github.com/LastBit97/todolist/service"
-
-	"github.com/gorilla/mux"
 )
 
-func TodoGetByIDController(w http.ResponseWriter, r *http.Request) {
+func TodoGetByIDController(ctx *gin.Context) {
 
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		utils.Return(w, false, http.StatusBadRequest, err, nil)
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+	todo, err := service.NewTodoOps(ctx).TodoGetByID(id)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	todo, err := service.NewTodoOps(r.Context()).TodoGetByID(id)
-	if err != nil {
-		utils.Return(w, false, http.StatusInternalServerError, err, nil)
-		return
-	}
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": todo})
 
-	utils.Return(w, true, http.StatusOK, nil, todo)
 }
 
-func TodoCreateController(w http.ResponseWriter, r *http.Request) {
+func TodoCreateController(ctx *gin.Context) {
 
 	var newTodo ent.Todo
-	err := json.NewDecoder(r.Body).Decode(&newTodo)
-	if err != nil {
-		utils.Return(w, false, http.StatusBadRequest, err, nil)
+
+	if err := ctx.ShouldBindJSON(&newTodo); err != nil {
+		ctx.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	createdTodo, err := service.NewTodoOps(r.Context()).TodoCreate(newTodo)
+	createdTodo, err := service.NewTodoOps(ctx).TodoCreate(newTodo)
+
 	if err != nil {
-		utils.Return(w, false, http.StatusInternalServerError, err, nil)
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	utils.Return(w, true, http.StatusOK, nil, createdTodo)
+	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": createdTodo})
 }
 
-func TodoUpdateController(w http.ResponseWriter, r *http.Request) {
+func TodoUpdateController(ctx *gin.Context) {
 
 	var newTodoData ent.Todo
-	err := json.NewDecoder(r.Body).Decode(&newTodoData)
-	if err != nil {
-		utils.Return(w, false, http.StatusBadRequest, err, nil)
+	if err := ctx.ShouldBindJSON(&newTodoData); err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	todoIdStr := ctx.Param("id")
+	todoId, err := strconv.Atoi(todoIdStr)
 	if err != nil {
-		utils.Return(w, false, http.StatusBadRequest, err, nil)
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
-	newTodoData.ID = id
+	newTodoData.ID = todoId
 
-	updatedTodo, err := service.NewTodoOps(r.Context()).TodoUpdate(newTodoData)
+	updatedTodo, err := service.NewTodoOps(ctx).TodoUpdate(newTodoData)
 	if err != nil {
-		utils.Return(w, false, http.StatusInternalServerError, err, nil)
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	utils.Return(w, true, http.StatusOK, nil, updatedTodo)
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": updatedTodo})
 }
 
-func TodoDeleteController(w http.ResponseWriter, r *http.Request) {
+func TodoDeleteController(ctx *gin.Context) {
 
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		utils.Return(w, false, http.StatusBadRequest, err, nil)
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	deletedID, err := service.NewTodoOps(r.Context()).TodoDelete(id)
+	deletedID, err := service.NewTodoOps(ctx).TodoDelete(id)
 	if err != nil {
-		utils.Return(w, false, http.StatusInternalServerError, err, nil)
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	utils.Return(w, true, http.StatusOK, nil, deletedID)
+	ctx.JSON(http.StatusNoContent, deletedID)
 }
