@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/LastBit97/todolist/config"
+	"github.com/LastBit97/todolist/middleware"
 	"github.com/getsentry/sentry-go"
+	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
 
 	"github.com/LastBit97/todolist/router"
@@ -16,18 +18,13 @@ const defaultPort = "8000"
 
 func main() {
 
-	err := sentry.Init(sentry.ClientOptions{
-		Dsn:              "https://9ace5290285b413bbbd534c8ca39e1fc@o4504917501804544.ingest.sentry.io/4504917504819200",
-		Debug:            true,
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn:              "http://8246520e051040cf804cbad4416c5955@sentry.infotecs.int/17",
 		EnableTracing:    true,
 		TracesSampleRate: 1.0,
-	})
-	if err != nil {
-		log.Fatalf("sentry.Init: %s", err)
+	}); err != nil {
+		fmt.Printf("Sentry initialization failed: %v\n", err)
 	}
-	defer sentry.Flush(2 * time.Second)
-
-	sentry.CaptureMessage("It works!")
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -50,6 +47,8 @@ func main() {
 	log.Println("Server started on port " + port)
 
 	server := gin.Default()
+	server.Use(sentrygin.New(sentrygin.Options{}))
+	server.Use(middleware.SentryTraceMiddleware())
 	rg := server.Group("/api")
 	router.RegisterRouter(rg)
 	log.Fatal(server.Run(":" + port))
