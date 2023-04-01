@@ -8,8 +8,8 @@ import (
 func registerTodoRouter(rg *gin.RouterGroup) {
 
 	router := rg.Group("/todo")
-	router.GET("/{id}", controller.TodoGetByIDController)
+	router.GET("/:id", controller.TodoGetByIDController)
 	router.POST("/", controller.TodoCreateController)
-	router.PUT("/{id}", controller.TodoUpdateController)
-	router.DELETE("/{id}", controller.TodoDeleteController)
+	router.PUT("/:id", controller.TodoUpdateController)
+	router.DELETE("/:id", controller.TodoDeleteController)
 }
