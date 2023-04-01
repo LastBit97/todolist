@@ -19,7 +19,7 @@ const defaultPort = "8000"
 func main() {
 
 	if err := sentry.Init(sentry.ClientOptions{
-		Dsn:              "https://9ace5290285b413bbbd534c8ca39e1fc@o4504917501804544.ingest.sentry.io/4504917504819200",
+		Dsn:              "http://8246520e051040cf804cbad4416c5955@sentry.infotecs.int/17",
 		EnableTracing:    true,
 		TracesSampleRate: 1.0,
 	}); err != nil {
