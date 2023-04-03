@@ -17,6 +17,7 @@ func SentryTraceMiddleware() gin.HandlerFunc {
 			fmt.Sprintf("%s %s", ctx.Request.Method, ctx.Request.RequestURI),
 			sentry.ContinueFromRequest(ctx.Request),
 		)
+		ctx.Set("parentSpan", span)
 		defer span.Finish()
 		ctx.Next()
 	}

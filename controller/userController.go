@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/LastBit97/todolist/ent"
+	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 
 	"github.com/LastBit97/todolist/service"
@@ -12,7 +13,9 @@ import (
 
 func UserGetAllController(ctx *gin.Context) {
 
-	users, err := service.NewUserOps(ctx).UsersGetAll()
+	parentSpan := ctx.MustGet("parentSpan").(*sentry.Span)
+
+	users, err := service.NewUserOps(ctx).UsersGetAll(parentSpan)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
