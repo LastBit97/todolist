@@ -4,21 +4,21 @@ import (
 	"fmt"
 
 	"github.com/getsentry/sentry-go"
-	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
 )
 
+// SentryTraceMiddleware создает middleware для добавления в события Sentry стектрейса.
 func SentryTraceMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		hub := sentrygin.GetHubFromContext(ctx)
-		traceCtx := sentry.SetHubOnContext(ctx, hub)
-		span := sentry.StartSpan(
-			traceCtx,
+		transaction := sentry.StartTransaction(
+			ctx,
 			fmt.Sprintf("%s %s", ctx.Request.Method, ctx.Request.RequestURI),
+			sentry.OpName("http"),
 			sentry.ContinueFromRequest(ctx.Request),
 		)
-		ctx.Set("parentSpan", span)
-		defer span.Finish()
+		defer transaction.Finish()
+		ctx.Set("transaction", transaction)
+
 		ctx.Next()
 	}
 }
