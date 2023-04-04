@@ -5,7 +5,6 @@ import (
 
 	"github.com/LastBit97/todolist/config"
 	"github.com/LastBit97/todolist/ent"
-	"github.com/getsentry/sentry-go"
 )
 
 type UserOps struct {
@@ -20,10 +19,7 @@ func NewUserOps(ctx context.Context) *UserOps {
 	}
 }
 
-func (r *UserOps) UsersGetAll(span *sentry.Span) ([]*ent.User, error) {
-	span.StartChild("db")
-	defer span.Finish()
-
+func (r *UserOps) UsersGetAll() ([]*ent.User, error) {
 	users, err := r.client.User.Query().WithTodos().All(r.ctx)
 	if err != nil {
 		return nil, err
