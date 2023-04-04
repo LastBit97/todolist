@@ -47,5 +47,8 @@ func NewEntClient() (*ent.Client, error) {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 
+	client.User = client.User.WithSentryTracing()
+	client.Todo = client.Todo.WithSentryTracing()
+
 	return client, err
 }

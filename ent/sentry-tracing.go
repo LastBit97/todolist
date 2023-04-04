@@ -5,11 +5,11 @@ package ent
 import "github.com/LastBit97/todolist/sentry"
 
 func (c *TodoClient) WithSentryTracing() *TodoClient {
-	cfg := config{driver: sentry.Trace(c.driver), log: c.log, debug: true, hooks: c.hooks}
+	cfg := config{driver: sentry.Trace(c.driver), log: c.log, debug: true, hooks: c.hooks, inters: c.inters}
 	return &TodoClient{config: cfg}
 }
 
 func (c *UserClient) WithSentryTracing() *UserClient {
-	cfg := config{driver: sentry.Trace(c.driver), log: c.log, debug: true, hooks: c.hooks}
+	cfg := config{driver: sentry.Trace(c.driver), log: c.log, debug: true, hooks: c.hooks, inters: c.inters}
 	return &UserClient{config: cfg}
 }

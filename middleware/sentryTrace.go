@@ -17,8 +17,6 @@ func SentryTraceMiddleware() gin.HandlerFunc {
 			sentry.ContinueFromRequest(ctx.Request),
 		)
 		defer transaction.Finish()
-		ctx.Set("transaction", transaction)
-
 		ctx.Next()
 	}
 }

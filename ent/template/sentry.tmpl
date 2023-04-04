@@ -13,7 +13,7 @@
 {{ range $n := $.Nodes }}
     {{ $client := print $n.Name "Client" }}
     func (c *{{ $client }}) WithSentryTracing() *{{ $client }} {
-        cfg := config{driver: sentry.Trace(c.driver), log: c.log, debug: true, hooks: c.hooks}
+        cfg := config{driver: sentry.Trace(c.driver), log: c.log, debug: true, hooks: c.hooks, inters: c.inters}
         return &{{ $client }}{config: cfg}
 }
 
