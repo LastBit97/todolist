@@ -9,7 +9,10 @@ import (
 	"github.com/getsentry/sentry-go"
 )
 
-const op string = "db"
+const (
+	transactionContextKey string = "transaction"
+	op                    string = "db"
+)
 
 type SentryDriver struct {
 	dialect.Driver
@@ -21,8 +24,9 @@ func Trace(d dialect.Driver) dialect.Driver {
 }
 
 func (d *SentryDriver) Exec(ctx context.Context, query string, args, v any) error {
-	span := sentry.StartSpan(ctx, op)
-	span.SetTag("query", query)
+	transaction := ctx.Value(transactionContextKey).(*sentry.Span)
+	span := transaction.StartChild(op)
+	span.Description = query
 	defer span.Finish()
 	return d.Driver.Exec(ctx, query, args, v)
 }
@@ -34,14 +38,16 @@ func (d *SentryDriver) ExecContext(ctx context.Context, query string, args ...an
 	if !ok {
 		return nil, fmt.Errorf("Driver.ExecContext is not supported")
 	}
-	span := sentry.StartSpan(ctx, op)
-	span.SetTag("query", query)
+	transaction := ctx.Value(transactionContextKey).(*sentry.Span)
+	span := transaction.StartChild(op)
+	span.Description = query
 	defer span.Finish()
 	return drv.ExecContext(ctx, query, args...)
 }
 
 func (d *SentryDriver) Query(ctx context.Context, query string, args, v any) error {
-	span := sentry.StartSpan(ctx, op)
+	transaction := ctx.Value(transactionContextKey).(*sentry.Span)
+	span := transaction.StartChild(op)
 	span.Description = query
 	defer span.Finish()
 	return d.Driver.Query(ctx, query, args, v)
@@ -54,8 +60,9 @@ func (d *SentryDriver) QueryContext(ctx context.Context, query string, args ...a
 	if !ok {
 		return nil, fmt.Errorf("Driver.QueryContext is not supported")
 	}
-	span := sentry.StartSpan(ctx, op)
-	span.SetTag("query", query)
+	transaction := ctx.Value(transactionContextKey).(*sentry.Span)
+	span := transaction.StartChild(op)
+	span.Description = query
 	defer span.Finish()
 	return drv.QueryContext(ctx, query, args...)
 }
